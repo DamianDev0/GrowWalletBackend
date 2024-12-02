@@ -1,20 +1,13 @@
-import { IsString, IsNumber, IsEnum, IsOptional } from 'class-validator';
-import { Currency } from '../../common/enum/currency';
+import { IsEnum, IsNumber, IsUUID } from 'class-validator';
 import { Period } from '../../common/enum/period.enum';
 
 export class CreateBudgetDto {
-  @IsString()
-  name: string;
-
   @IsNumber()
   amount: number;
 
-  @IsEnum(Currency)
-  currency: Currency;
+  @IsUUID()
+  categoryId: string;
 
   @IsEnum(Period)
   period: Period;
-
-  @IsOptional()
-  categoryId?: number;
 }

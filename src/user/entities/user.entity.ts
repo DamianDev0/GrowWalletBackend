@@ -1,6 +1,15 @@
-import { Budget } from '../../budget/entities/budget.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Transaction } from '../../transaction/entities/transaction.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Budget } from '../../budget/entities/budget.entity';
+import { Category } from '../../category/entities/category.entity';
 
 @Entity()
 export class User {
@@ -13,15 +22,19 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  phone?: string;
-
   @Column()
   name?: string;
+
+  @OneToOne(() => Wallet, (wallet) => wallet.user, { cascade: true })
+  @JoinColumn()
+  wallet: Wallet;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  transactions: Transaction[];
 
   @OneToMany(() => Budget, (budget) => budget.user)
   budgets: Budget[];
 
-  @OneToMany(() => Transaction, (transaction) => transaction.user)
-  transactions: Transaction[];
+  @OneToMany(() => Category, (category) => category.user)
+  categories: Category[];
 }

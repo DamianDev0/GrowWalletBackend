@@ -2,26 +2,26 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  ManyToOne,
+  OneToOne,
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Budget } from '../../budget/entities/budget.entity';
 import { Transaction } from '../../transaction/entities/transaction.entity';
 import { User } from '../../user/entities/user.entity';
+import { Currency } from '../../common/enum/currency';
 
 @Entity()
-export class Category {
+export class Wallet {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  name: string;
+  @Column('decimal', { precision: 10, scale: 2 })
+  balance: number;
 
-  @Column({ type: 'text', nullable: true })
-  description: string;
+  @Column({ type: 'enum', enum: Currency, default: Currency.COP })
+  currency: Currency;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -29,13 +29,10 @@ export class Category {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.categories)
+  @OneToOne(() => User, (user) => user.wallet)
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @OneToMany(() => Budget, (budget) => budget.category)
-  budgets: Budget[];
-
-  @OneToMany(() => Transaction, (transaction) => transaction.category)
+  @OneToMany(() => Transaction, (transaction) => transaction.wallet)
   transactions: Transaction[];
 }

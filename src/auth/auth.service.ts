@@ -1,3 +1,4 @@
+// src/auth/auth.service.ts
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
@@ -14,8 +15,11 @@ export class AuthService {
     private readonly bcryptService: BcryptService,
   ) {}
 
-  private generateToken(user: any): string {
-    const payload = { id: user.id, email: user.email, role: user.role };
+  private generateToken(user: User): string {
+    const payload = {
+      id: user.id,
+      walletId: user.wallet ? user.wallet.id : null,
+    };
     return this.jwtService.sign(payload);
   }
 
@@ -24,7 +28,9 @@ export class AuthService {
   }
 
   async loginUser({ email, password }: LoginDto) {
-    const findUser = await this.userService.findUserWithPassword(email);
+    const findUser = await this.userService.findUserWithPassword(email, {
+      relations: ['wallet'],
+    });
 
     if (!findUser) {
       throw new UnauthorizedException('User not found');
@@ -40,9 +46,11 @@ export class AuthService {
     }
 
     const accessToken = this.generateToken(findUser);
+
     return {
       accessToken,
       id: findUser.id,
+      walletId: findUser.wallet ? findUser.wallet.id : null,
     };
   }
 }

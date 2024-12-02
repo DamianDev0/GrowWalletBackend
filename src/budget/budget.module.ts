@@ -1,22 +1,17 @@
 import { Module } from '@nestjs/common';
 import { BudgetService } from './budget.service';
 import { BudgetController } from './budget.controller';
-import { Budget } from './entities/budget.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { AuthGuard } from '../auth/guard/auth.guard';
-import { CategoryModule } from '../category/category.module';
-import { UserModule } from '../user/user.module';
-import { User } from '../user/entities/user.entity';
+import { Budget } from './entities/budget.entity';
+import { Wallet } from '../wallet/entities/wallet.entity';
 import { Category } from '../category/entities/category.entity';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { JwtService } from '@nestjs/jwt';
+import { Transaction } from '../transaction/entities/transaction.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Budget, User, Category]),
-    CategoryModule,
-    UserModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Budget, Wallet, Category, Transaction])],
   controllers: [BudgetController],
-  providers: [BudgetService, JwtService, AuthGuard],
+  providers: [BudgetService, AuthGuard, JwtService],
 })
 export class BudgetModule {}

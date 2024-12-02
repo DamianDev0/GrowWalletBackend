@@ -3,35 +3,43 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { Budget } from '../../budget/entities/budget.entity';
+import { Wallet } from '../../wallet/entities/wallet.entity';
 import { Category } from '../../category/entities/category.entity';
 import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Transaction {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal')
   amount: number;
 
-  @Column()
-  description: string;
-
-  @Column({ type: 'date' })
+  @Column('date')
   date: Date;
 
-  @ManyToOne(() => Budget, (budget) => budget.transactions, { eager: true })
-  budget: Budget;
+  @Column({ type: 'text', nullable: true })
+  description: string;
 
-  @ManyToOne(() => Category, (category) => category.transactions, {
-    eager: true,
-  })
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @ManyToOne(() => Wallet, (wallet) => wallet.transactions)
+  @JoinColumn({ name: 'walletId' })
+  wallet: Wallet;
+
+  @ManyToOne(() => Category, (category) => category.transactions)
+  @JoinColumn({ name: 'categoryId' })
   category: Category;
 
-  @ManyToOne(() => User, (user) => user.transactions, { eager: true })
-  @JoinColumn()
+  @ManyToOne(() => User, (user) => user.transactions)
+  @JoinColumn({ name: 'userId' })
   user: User;
 }

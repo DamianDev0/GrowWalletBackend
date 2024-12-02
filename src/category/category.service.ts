@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ActiveUserInterface } from '../common/interface/activeUserInterface';
 
 @Injectable()
 export class CategoryService {
@@ -12,24 +13,50 @@ export class CategoryService {
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  create(createCategoryDto: CreateCategoryDto) {
-    return this.categoryRepository.save(createCategoryDto);
+  async create(
+    createCategoryDto: CreateCategoryDto,
+    user: ActiveUserInterface,
+  ) {
+    const category = this.categoryRepository.create({
+      ...createCategoryDto,
+      user,
+    });
+    const savedCategory = await this.categoryRepository.save(category);
+    delete savedCategory.user;
+    return savedCategory;
   }
 
-  findAll() {
-    return this.categoryRepository.find();
+  async createDefaultCategory(createCategoryDto: CreateCategoryDto) {
+    const category = this.categoryRepository.create(createCategoryDto);
+    return this.categoryRepository.save(category);
   }
 
-  findOne(id: number) {
-    return this.categoryRepository.findOne({ where: { id } });
+  findAll(user: ActiveUserInterface) {
+    return this.categoryRepository.find({ where: { user: { id: user.id } } });
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    await this.categoryRepository.update(id, updateCategoryDto);
-    return this.findOne(id);
+  async update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+    user: ActiveUserInterface,
+  ) {
+    const category = await this.categoryRepository.findOne({
+      where: { id, user: { id: user.id } },
+    });
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+    Object.assign(category, updateCategoryDto);
+    return this.categoryRepository.save(category);
   }
 
-  remove(id: number) {
-    return this.categoryRepository.delete(id);
+  async remove(id: string, user: ActiveUserInterface) {
+    const category = await this.categoryRepository.findOne({
+      where: { id, user: { id: user.id } },
+    });
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+    return this.categoryRepository.remove(category);
   }
 }

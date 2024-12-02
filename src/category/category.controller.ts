@@ -1,45 +1,57 @@
 import {
   Controller,
-  Get,
   Post,
+  Get,
+  Patch,
+  Delete,
   Body,
   Param,
-  Delete,
-  Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { ActiveUser } from '../common/decorators/active-user.decorator';
+import { ActiveUserInterface } from '../common/interface/activeUserInterface';
+import { AuthGuard } from '../auth/guard/auth.guard';
 
-@Controller('categories')
+@Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
+  @Post('default')
+  async createDefaultCategory(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoryService.createDefaultCategory(createCategoryDto);
+  }
+  @UseGuards(AuthGuard)
   @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.categoryService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.categoryService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: number,
-    @Body() updateCategoryDto: UpdateCategoryDto,
+  async create(
+    @Body() createCategoryDto: CreateCategoryDto,
+    @ActiveUser() user: ActiveUserInterface,
   ) {
-    return this.categoryService.update(id, updateCategoryDto);
+    return this.categoryService.create(createCategoryDto, user);
   }
 
+  @UseGuards(AuthGuard)
+  @Get()
+  async findAll(@ActiveUser() user: ActiveUserInterface) {
+    return this.categoryService.findAll(user);
+  }
+  @UseGuards(AuthGuard)
+  @Patch(':id')
+  async update(
+    @Param('id') categoryId: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+    @ActiveUser() user: ActiveUserInterface,
+  ) {
+    return this.categoryService.update(categoryId, updateCategoryDto, user);
+  }
+  @UseGuards(AuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.categoryService.remove(id);
+  async remove(
+    @Param('id') categoryId: string,
+    @ActiveUser() user: ActiveUserInterface,
+  ) {
+    return this.categoryService.remove(categoryId, user);
   }
 }

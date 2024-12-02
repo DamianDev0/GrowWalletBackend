@@ -3,50 +3,44 @@ import {
   Column,
   PrimaryGeneratedColumn,
   ManyToOne,
-  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { Transaction } from '../../transaction/entities/transaction.entity';
 import { Category } from '../../category/entities/category.entity';
-import { Period } from '../../common/enum/period.enum';
-import { Currency } from '../../common/enum/currency';
+import { User } from '../../user/entities/user.entity';
+import { Period } from 'src/common/enum/period.enum';
 
 @Entity()
 export class Budget {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column()
-  name: string;
-
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal')
   amount: number;
 
-  @Column({
-    type: 'enum',
-    enum: Currency,
-    default: Currency.COP,
-  })
-  currency: Currency;
+  @Column('decimal', { default: 0 })
+  spentAmount: number;
+
+  @Column('date')
+  startDate: Date;
+
+  @Column('date')
+  endDate: Date;
 
   @Column({ type: 'enum', enum: Period, default: Period.MONTHLY })
   period: Period;
 
-  @Column({ type: 'date' })
-  startDate: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-  @Column({ type: 'date' })
-  endDate: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.budgets, { eager: true })
-  @JoinColumn()
+  @ManyToOne(() => User, (user) => user.budgets)
+  @JoinColumn({ name: 'userId' })
   user: User;
-
-  @OneToMany(() => Transaction, (transaction) => transaction.budget)
-  transactions: Transaction[];
-
-  @ManyToOne(() => Category, { eager: true })
-  @JoinColumn()
+  @ManyToOne(() => Category, (category) => category.budgets)
+  @JoinColumn({ name: 'categoryId' })
   category: Category;
 }
