@@ -37,7 +37,7 @@ export class UserService {
   ): Promise<User> {
     const user = await this.UserRepository.findOne({
       where: { email },
-      select: ['id', 'password'],
+      select: ['id', 'password', 'name'],
       relations: options.relations,
     });
     return user;

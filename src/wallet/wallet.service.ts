@@ -1,5 +1,9 @@
 // src/wallet/wallet.service.ts
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Wallet } from './entities/wallet.entity';
@@ -38,5 +42,17 @@ export class WalletService {
     await this.userRepository.update(user.id, { wallet: savedWallet });
 
     return savedWallet;
+  }
+
+  async getBalance(user: ActiveUserInterface): Promise<Wallet> {
+    const wallet = await this.walletRepository.findOne({
+      where: { user: { id: user.id } },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found for the user');
+    }
+
+    return wallet;
   }
 }

@@ -50,6 +50,7 @@ export class AuthService {
     return {
       accessToken,
       id: findUser.id,
+      name: findUser.name,
       walletId: findUser.wallet ? findUser.wallet.id : null,
     };
   }

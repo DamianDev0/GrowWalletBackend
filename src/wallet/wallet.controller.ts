@@ -1,5 +1,5 @@
 // src/wallet/wallet.controller.ts
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { ActiveUser } from '../common/decorators/active-user.decorator';
@@ -22,5 +22,10 @@ export class WalletController {
       balance: wallet.balance,
       currency: wallet.currency,
     };
+  }
+
+  @Get('balance')
+  async getBalance(@ActiveUser() user: ActiveUserInterface) {
+    return await this.walletService.getBalance(user);
   }
 }
